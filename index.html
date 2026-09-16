@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>发疯文学生成器</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#12071f;font-family:-apple-system,'PingFang SC',sans-serif;color:#f0e6ff;min-height:100vh}
+.wrap{max-width:480px;margin:0 auto;padding:24px 18px 60px}
+h1{font-size:26px;text-align:center;margin:10px 0 4px;color:#ff4d94;text-shadow:0 0 20px #ff4d9466}
+.sub{text-align:center;color:#b8a0d4;font-size:13px;margin-bottom:22px}
+.lab{font-size:14px;color:#b8a0d4;margin:16px 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{background:#241333;border:1px solid #4a2c6e;color:#d4c0f0;border-radius:99px;padding:9px 18px;font-size:14px;cursor:pointer}
+.chip.on{background:linear-gradient(90deg,#ff4d94,#a44dff);color:#fff;border-color:transparent;font-weight:bold}
+.btn{width:100%;background:linear-gradient(90deg,#ff4d94,#a44dff);color:#fff;border:none;border-radius:99px;padding:15px;font-size:17px;font-weight:bold;cursor:pointer;margin-top:22px}
+.btn.ghost{background:transparent;border:2px solid #ff4d94;color:#ff9ec7}
+.card{background:#1a0b2e;border:2px dashed #ff4d94;border-radius:18px;padding:24px 20px;margin-top:18px;position:relative}
+.card .txt{font-size:16px;line-height:2.1;color:#f0e6ff;min-height:120px}
+.card .mood{font-size:12px;color:#ff4d94;letter-spacing:2px;margin-bottom:10px}
+.tbtns{display:flex;gap:10px;margin-top:18px}
+.tb{flex:1;background:#241333;border:1px solid #4a2c6e;color:#e0d0ff;border-radius:12px;padding:12px;font-size:14px;cursor:pointer}
+.tb.main{background:linear-gradient(90deg,#ff4d94,#a44dff);border:none;font-weight:bold}
+.foot{text-align:center;color:#6b5488;font-size:12px;margin-top:20px}
+canvas{max-width:100%;border-radius:14px;margin-top:16px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+<h1>🔥 发疯文学生成器</h1>
+<p class="sub">不是我想发疯，是这个世界逼我的</p>
+<p class="lab">① 选一个今天让你疯的场景</p>
+<div class="chips" id="scenes"></div>
+<p class="lab">② 疯到什么程度</p>
+<div class="chips" id="levels"></div>
+<button class="btn" onclick="gen()">🔥 开始发疯</button>
+</div>
+<script>
+const SC=[["上班","💼"],["上学","🎓"],["恋爱","💔"],["没钱","💸"],["减肥","🥗"],["通用","🌀"]];
+const LV=["微疯","中疯","癫狂"];
+let sc=null,lv=null,out_txt="";
+const app=document.getElementById("app");
+function chips(box,arr,sel){const e=document.getElementById(box);e.innerHTML=arr.map((x,i)=>`<span class="chip${sel===i?' on':''}" onclick="pick('${box}',${i})">${x[1]}${x[0]}</span>`).join("");}
+function pick(box,i){if(box==="scenes")sc=i;else lv=i;chips("scenes",SC,sc);chips("levels",LV,lv);}
+chips("scenes",SC,-1);chips("levels",LV,-1);
+const T={
+"上班":["我不是在上班，我是在上香。每天给工资条上香，求它别离开我。","领导的PPT在画饼，我的胃在抽签，签上写着：饿。","工位是我的道场，Excel是我的经文，我敲的不是键盘，是木鱼。","会议室空调开16度，不是热，是我心里有火。","别人上班带电脑，我上班带遗书，以防万一。","我的KPI完成了，完成的是KPI的K——枯了。"],
+"上学":["早八的阳光照在我脸上，照不出人的样子。","老师说要活到老学到老，我：那我这个月的老是白学了吗。","卷又卷不赢，躺又躺不平，我只能45度侧躺，仰望卷王飞过。","图书馆占座的那个人，你占的不是座，是我的命。","考试范围是星辰大海，我复习的是一滴水。","我不是在上课，我是在替我的未来签收失望。"],
+"恋爱":["他说他喜欢自由的灵魂，原来我的灵魂束缚了他的自由。","我把他置顶，他把我置之不理。","聊天记录停在我发的最后一句话，像一座孤坟。","我不哭，我只是在给眼睛做有氧运动。","月老是不是把我的红线拿去织毛衣了？","爱情它绕过我，像绕过一段正在施工的路。"],
+"没钱":["我的钱包比我的脸还干净。","工资像大姨妈，一月来一次，一周就没了。","别人的钱包是钱包，我的钱包是遗像，里面都是回不去的钱。","我不是月光族，我是月初光。","我看中的东西在购物车里过夜，我在被窝里过夜，我们都有光明的未来。","存款和头发，一个都没留住。"],
+"减肥":["我和奶茶说分手，它拉着炸鸡说：你先跟它分。","运动一小时消耗300卡，奖励自己一顿600卡的。","体重秤今天坏了，不是它坏，是它不忍心。","我不是胖，我是可爱得膨胀了。","白天是减肥的人，晚上是干饭的魂。","我与马甲线的距离，隔着一整条烧烤街。"],
+"通用":["世界是一个巨大的草台班子，而我是班上最草的。","精神状态很好，好到该进厂维修了。","我一点也不疯，我只是清醒得比较夸张。","情绪稳定，稳定地不稳定。","别人内耗，我直接内爆。","我的精神状态领先全人类一个版本。"]
+};
+const EXTRA={"微疯":["（微笑，保持微笑）","（深呼吸）","（并无大碍）"],"中疯":["（摔！捡起来继续用）","（原地转圈）","（疯狂点头）"],"癫狂":["啊啊啊啊啊啊！！","（掀桌）（再铺好）（趴下）","！！！（不受控原地升天）"]};
+function gen(){
+ if(sc===null||lv===null){alert("先选场景和程度");return;}
+ const key=Object.keys(T===undefined?{}:{}), arr=T[SC[sc][0]]||T["通用"];
+ let base=arr[Math.floor(Math.random()*arr.length)];
+ let out=base;
+ if(lv>=1){const e2=EXTRA["微疯"][Math.floor(Math.random()*3)];out+=" "+e2;}
+ if(lv===2){const e3=EXTRA["癫狂"][Math.floor(Math.random()*3)];out+=" "+e3+" （已疯，勿扰）";}
+ out_txt=out;
+ app.insertAdjacentHTML("beforeend",`<div class="card" id="cbox"><p class="mood">${SC[sc][1]} ${SC[sc][0]} · ${LV[lv]}级发疯</p><p class="txt">${out}</p></div>
+ <div class="tbtns"><button class="tb main" onclick="gen()">🔄 再疯一句</button>
+ <button class="tb" onclick="copyTxt()">📋 复制文案</button>
+ <button class="tb" onclick="drawCard()">🎴 生成卡片</button></div>
+ <canvas id="cd" width="1080" height="1440" style="display:none"></canvas>`);
+ document.getElementById("cbox").scrollIntoView({behavior:"smooth"});
+}
+function copyTxt(){navigator.clipboard.writeText(out_txt).then(()=>alert("已复制，去发疯吧"));}
+function drawCard(){
+ const x=document.getElementById("cd").getContext("2d");
+ const g=x.createLinearGradient(0,0,1080,1440);g.addColorStop(0,"#1a0b2e");g.addColorStop(1,"#3d0a2e");
+ x.fillStyle=g;x.fillRect(0,0,1080,1440);
+ x.fillStyle="#ff4d94";x.font="bold 40px sans-serif";x.fillText("🔥 发疯文学",70,110);
+ x.fillStyle="#b8a0d4";x.font="26px sans-serif";x.textAlign="right";x.fillText(SC[sc][1]+" "+LV[lv]+"级",1010,110);x.textAlign="left";
+ x.fillStyle="#f0e6ff";x.font="46px bold sans-serif";
+ wrapTxt(x,out_txt,70,240,940,76);
+ x.fillStyle="#ff4d94";x.font="bold 30px sans-serif";x.fillText("—— 今日发疯 · 明日继续",70,1300);
+ x.textAlign="right";x.fillStyle="#8b949e";x.font="24px sans-serif";x.fillText("搜「小薅薅」· 每天疯一点",1010,1300);x.textAlign="left";
+ document.getElementById("cd").style.display="block";
+ const a=document.createElement("a");a.download="fafa-card.png";a.href=document.getElementById("cd").toDataURL();a.click();
+}
+function wrapTxt(x,txt,cx,sy,maxw,lh){
+ let line="",y=sy;
+ for(const ch of txt){ if(x.measureText(line+ch).width>maxw){x.fillText(line,cx,y);line=ch;y+=lh;} else line+=ch;}
+ x.fillText(line,cx,y);
+}
+</script>
+</body>
+</html>
